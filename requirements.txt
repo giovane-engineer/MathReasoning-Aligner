@@ -1,2 +1,2 @@
-sympy>=1.12
+sympy
 torch
