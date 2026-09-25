@@ -1,4 +1,2 @@
-huggingface_hub==0.20.3
-gradio>=4.38.0
 sympy>=1.12
 torch
