@@ -1,11 +1,12 @@
 import json
 import sympy as sp
 
+
 def generate_synthetic_cot_sample():
     x = sp.Symbol('x')
     func = sp.sin(x) * sp.exp(x)
     derivative = sp.diff(func, x)
-    
+
     sample = {
         "instruction": f"Compute the derivative of $f(x) = {sp.latex(func)}$. Provide step-by-step reasoning.",
         "cot_reasoning": (
@@ -17,6 +18,7 @@ def generate_synthetic_cot_sample():
         "ground_truth": str(derivative)
     }
     return sample
+
 
 if __name__ == "__main__":
     sample = generate_synthetic_cot_sample()
