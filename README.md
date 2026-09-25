@@ -34,6 +34,19 @@ flowchart LR
 
 The aligned benchmark covers calculus, differential equations, and symbolic linear algebra.
 
+## Advanced Features: Step-Level PRM & Adversarial Red-Teaming
+
+The Step-Level Process Reward Evaluator in `alignment/process_reward.py` checks
+each transition in a CoT sequence instead of scoring only the final answer. It
+returns a score for every step, the zero-based index of the first invalid
+transition, and a self-correction instruction tailored to common failures such
+as unsafe cancellation, invalid logarithm domains, or omitted roots.
+
+The adversarial red-team in `evaluation/adversarial_red_team.py` stress-tests
+the hybrid validator against these cases. It exits with a failure when any
+known logical trap is accepted, making a 100% detection score a CI-friendly
+regression gate.
+
 ---
 
 ## Repository Structure

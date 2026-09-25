@@ -28,7 +28,15 @@ def _time_limit(seconds: float) -> Iterator[None]:
 
 
 def _parse_expression(expression: str):
-    return sp.sympify(expression, locals={"Matrix": sp.Matrix})
+    return sp.sympify(expression, locals={"Matrix": sp.Matrix}, evaluate=False)
+
+
+def _has_variable_denominator(expression: str) -> bool:
+    try:
+        parsed = sp.sympify(expression, locals={"Matrix": sp.Matrix}, evaluate=False)
+        return bool(sp.denom(parsed).free_symbols)
+    except (TypeError, SyntaxError, ValueError, sp.SympifyError):
+        return False
 
 
 def _exactly_equivalent(prediction, target) -> bool:
@@ -97,6 +105,11 @@ def verify_symbolic_equivalence(
         predicted_expr = _parse_expression(prediction)
         target_expr = _parse_expression(target)
     except (TypeError, SyntaxError, ValueError, sp.SympifyError):
+        return False
+
+    # SymPy can simplify x/x to 1 and thereby hide the excluded case x = 0.
+    # Preserve a domain guard only for denominators that depend on symbols.
+    if _has_variable_denominator(prediction) != _has_variable_denominator(target):
         return False
 
     try:
