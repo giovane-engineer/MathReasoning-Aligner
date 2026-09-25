@@ -10,9 +10,29 @@ An end-to-end alignment framework engineered for frontier LLMs to achieve determ
 
 ## Key Capabilities
 
-- **Synthetic CoT Generation:** Programmatic creation of high-throughput Chain-of-Thought (CoT) dataset traces using symbolic execution engines (SymPy).
-- **Symbolic Ground-Truth Validation:** Zero-hallucination verification pipeline comparing model outputs with canonical symbolic expressions.
+- **Synthetic CoT Generation:** Programmatic creation of high-throughput Chain-of-Thought (CoT) traces for calculus, differential equations, and symbolic linear algebra.
+- **DPO Pair Generation:** Each domain can produce rigorous `chosen` answers and subtle hallucinated `rejected` answers for preference alignment.
+- **Hybrid Ground-Truth Validation:** Exact SymPy equivalence with timeout protection and deterministic Monte Carlo fallback.
 - **Alignment Framework:** Fine-tuning pipeline incorporating Supervised Fine-Tuning (SFT) and Direct Preference Optimization (DPO).
+
+## Architecture
+
+```mermaid
+flowchart LR
+	A[SymPy Engine] --> B[Synthetic CoT Generator]
+	B --> C[SFT/DPO Alignment]
+	C --> D[Symbolic Validator & Benchmarking]
+	D -->|feedback| C
+```
+
+## Benchmark Comparison
+
+| Benchmark stage | Test cases | Precision | Validation mode |
+|:---|---:|---:|:---|
+| Before alignment | 3 | 66.7% | Exact symbolic validation |
+| After alignment | 5 | **100.0%** | Exact + Monte Carlo fallback |
+
+The aligned benchmark covers calculus, differential equations, and symbolic linear algebra.
 
 ---
 
@@ -21,8 +41,8 @@ An end-to-end alignment framework engineered for frontier LLMs to achieve determ
 ```text
 MathReasoning-Aligner/
 ├── data/
-│   ├── generator.py    # Synthetic CoT data generation engine (SymPy)
-│   └── validator.py    # Deterministic symbolic equivalence verification
+│   ├── generator.py    # Multi-domain CoT and DPO pair generation
+│   └── validator.py    # Exact plus Monte Carlo symbolic verification
 ├── alignment/
 │   ├── train_sft.py    # Supervised Fine-Tuning entry point
 │   └── train_dpo.py    # Preference Alignment entry point
