@@ -1,3 +1,16 @@
+---
+title: MathReasoning Aligner
+emoji: "📊"
+colorFrom: purple
+colorTo: yellow
+sdk: gradio
+sdk_version: 6.28.0
+python_version: "3.12"
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # MathReasoning-Aligner
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
