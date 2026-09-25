@@ -6,4 +6,4 @@ bitsandbytes>=0.43.0
 sympy>=1.12
 datasets>=2.18.0
 pytest>=8.0.0
-gradio>=4.0.0
+gradio==6.28.0
