@@ -1,2 +1,3 @@
-sympy>=1.12
+gradio
+sympy
 torch
