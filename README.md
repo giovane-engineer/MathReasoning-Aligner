@@ -47,6 +47,28 @@ the hybrid validator against these cases. It exits with a failure when any
 known logical trap is accepted, making a 100% detection score a CI-friendly
 regression gate.
 
+## Supported Back Models & Efficiency
+
+The shared loader in `alignment/model_loader.py` supports these mathematical
+reasoning backbones:
+
+| Back model | Typical profile | Efficient mode |
+|:---|:---|:---|
+| `Qwen/Qwen2.5-Math-1.5B` | Compact math specialist | QLoRA / NF4 |
+| `deepseek-ai/deepseek-math-7b-instruct` | Larger math specialist | QLoRA / NF4 |
+| `meta-llama/Llama-3.2-3B-Instruct` | General instruction backbone | QLoRA / NF4 |
+
+By default, SFT and DPO load the base model with 4-bit NF4 BitsAndBytes
+quantization and attach a PEFT LoRA adapter (`r=16`, `lora_alpha=32`). This
+reduces trainable parameters and VRAM usage while keeping the backbone frozen.
+Disable quantization for hardware without BitsAndBytes with
+`--no-quantize-4bit`:
+
+```bash
+python alignment/train_sft.py --model Qwen/Qwen2.5-Math-1.5B
+python alignment/train_dpo.py --model deepseek-ai/deepseek-math-7b-instruct
+```
+
 ---
 
 ## Repository Structure
