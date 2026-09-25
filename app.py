@@ -2,6 +2,8 @@
 
 from typing import Tuple
 
+import gradio as gr
+
 from alignment.prm_search import StepLevelPRM
 from data.generator import SUPPORTED_DOMAINS, generate_dpo_pair, generate_synthetic_cot_sample
 from data.validator import verify_symbolic_equivalence
@@ -75,8 +77,6 @@ def generate_solution(problem: str) -> Tuple[str, dict, dict]:
 
 def build_app():
     """Build the Spaces-ready Gradio app without loading a language model."""
-    import gradio as gr
-
     with gr.Blocks(title="MathReasoning Aligner") as demo:
         gr.Markdown(
             "# MathReasoning Aligner\n"
@@ -109,5 +109,8 @@ def build_app():
     return demo
 
 
+demo = build_app()
+
+
 if __name__ == "__main__":
-    build_app().launch()
+    demo.launch()
