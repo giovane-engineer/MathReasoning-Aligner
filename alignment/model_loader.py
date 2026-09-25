@@ -1,5 +1,6 @@
 """Shared model-backbone loader with optional 4-bit QLoRA support."""
 
+import importlib
 from typing import List, Tuple
 
 
@@ -45,18 +46,24 @@ def load_back_model(model_name: str, quantize_4bit: bool = True) -> Tuple[object
 
     import torch
     from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-    from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+    from transformers import AutoModelForCausalLM, AutoTokenizer
 
-    model_kwargs = {"device_map": "auto"}
-    if quantize_4bit:
-        try:
-            import bitsandbytes  # noqa: F401
-        except ImportError as error:
-            raise ImportError(
-                "4-bit loading requires bitsandbytes. Install it with "
-                "'pip install bitsandbytes', or pass quantize_4bit=False."
-            ) from error
+    try:
+        from transformers import BitsAndBytesConfig
+    except ImportError:
+        BitsAndBytesConfig = None
 
+    try:
+        bitsandbytes = importlib.import_module("bitsandbytes")
+    except ImportError:
+        bitsandbytes = None
+
+    use_4bit = quantize_4bit and torch.cuda.is_available()
+    use_4bit = use_4bit and bitsandbytes is not None and BitsAndBytesConfig is not None
+    device_map = "auto" if torch.cuda.is_available() else {"": "cpu"}
+    model_kwargs = {"device_map": device_map}
+    if use_4bit:
+        assert BitsAndBytesConfig is not None
         model_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
@@ -66,6 +73,9 @@ def load_back_model(model_name: str, quantize_4bit: bool = True) -> Tuple[object
     else:
         model_kwargs["torch_dtype"] = torch.bfloat16
 
+    if quantize_4bit and not use_4bit:
+        print("4-bit quantization unavailable; falling back to CPU bfloat16 loading.")
+
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
     model = AutoModelForCausalLM.from_pretrained(model_name, **model_kwargs)
 
@@ -73,7 +83,7 @@ def load_back_model(model_name: str, quantize_4bit: bool = True) -> Tuple[object
         tokenizer.pad_token = tokenizer.eos_token
     model.config.pad_token_id = tokenizer.pad_token_id
 
-    if quantize_4bit:
+    if use_4bit:
         model = prepare_model_for_kbit_training(model)
 
     lora_config = LoraConfig(
